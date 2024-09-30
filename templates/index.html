@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NLP Analyzer</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>NLP Analyzer</h1>
+    <form method="POST">
+        <label for="platform">Platform:</label>
+        <select name="platform">
+            <option value="Facebook">Facebook</option>
+            <option value="YouTube">YouTube</option>
+            <option value="Instagram">Instagram</option>
+        </select>
+        <br><br>
+        <label for="start_year">Start Year (YYYY):</label>
+        <input type="text" name="start_year" required>
+        <br><br>
+        <label for="end_year">End Year (YYYY):</label>
+        <input type="text" name="end_year" required>
+        <br><br>
+        <label for="keyword">Keyword:</label>
+        <input type="text" name="keyword" required>
+        <br><br>
+        <input type="submit" value="Analyze">
+    </form>
+    <br>
+    {% if results %}
+        <h2>Keyword in Context Results for "{{ keyword }}"</h2>
+        {% for year, contexts in results['kwic'].items() %}
+            <h3>Year: {{ year }}</h3>
+            <ul>
+                {% for left, keyword, right in contexts %}
+                    <li>...{{ left }} <strong>{{ keyword }}</strong> {{ right }}...</li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+        <br>
+        <h2>Word Frequency Analysis</h2>
+        {% for year, freq_df in results['frequency'].items() %}
+            <h3>Year: {{ year }}</h3>
+            <table border="1">
+                <tr>
+                    <th>Word</th>
+                    <th>Frequency</th>
+                </tr>
+                {% for index, row in freq_df.iterrows() %}
+                    <tr>
+                        <td>{{ row['Word'] }}</td>
+                        <td>{{ row['Frequency'] }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>
