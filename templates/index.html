@@ -2,30 +2,60 @@
 <html>
 <head>
     <title>NLP Analyzer</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .loading {
+            display: none;
+            text-align: center;
+            font-size: 1.5em;
+            color: #666;
+        }
+        .loading.active {
+            display: block;
+        }
+    </style>
+    <script>
+        function showLoading() {
+            document.getElementById('loading').classList.add('active');
+        }
+    </script>
 </head>
 <body>
     <h1>NLP Analyzer</h1>
-    <form method="POST">
+    <form method="POST" onsubmit="showLoading()">
         <label for="platform">Platform:</label>
-        <select name="platform">
+        <select name="platform" required>
             <option value="Facebook">Facebook</option>
             <option value="YouTube">YouTube</option>
             <option value="Instagram">Instagram</option>
         </select>
         <br><br>
+
         <label for="start_year">Start Year (YYYY):</label>
         <input type="text" name="start_year" required>
         <br><br>
+
         <label for="end_year">End Year (YYYY):</label>
         <input type="text" name="end_year" required>
         <br><br>
+
         <label for="keyword">Keyword:</label>
         <input type="text" name="keyword" required>
         <br><br>
+
+        <!-- Policy Selection Checkboxes -->
+        <label>Select Policy Types:</label><br>
+        <input type="checkbox" name="policies" value="Community Guidelines" checked> Community Guidelines<br>
+        <input type="checkbox" name="policies" value="Privacy Policy" checked> Privacy Policy<br>
+        <input type="checkbox" name="policies" value="Terms of Service" checked> Terms of Service<br>
+        <br><br>
+
         <input type="submit" value="Analyze">
     </form>
-    <br>
+
+    <!-- Loading Indicator -->
+    <div id="loading" class="loading">Processing... Please wait.</div>
+
+    <!-- Display Results -->
     {% if results %}
         <h2>Keyword in Context Results for "{{ keyword }}"</h2>
         {% for year, contexts in results['kwic'].items() %}
@@ -36,23 +66,22 @@
                 {% endfor %}
             </ul>
         {% endfor %}
-        <br>
-        <h2>Word Frequency Analysis</h2>
-        {% for year, freq_df in results['frequency'].items() %}
-            <h3>Year: {{ year }}</h3>
-            <table border="1">
-                <tr>
-                    <th>Word</th>
-                    <th>Frequency</th>
-                </tr>
-                {% for index, row in freq_df.iterrows() %}
-                    <tr>
-                        <td>{{ row['Word'] }}</td>
-                        <td>{{ row['Frequency'] }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endfor %}
+
+        <!-- Display Selected Policies -->
+        <h3>Selected Policies:</h3>
+        <ul>
+            {% for policy in fetched_policies %}
+                <li>{{ policy }}</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Display Yearly Frequency Bar Plot -->
+        <h2>Yearly Frequency Analysis (Bar Plot)</h2>
+        {% if img_path %}
+            <img src="{{ url_for('serve_image', filename='yearly_frequency.png') }}" alt="Yearly Frequency Plot">
+        {% else %}
+            <p>No data available to generate a yearly frequency plot for the selected period.</p>
+        {% endif %}
     {% endif %}
 </body>
 </html>
